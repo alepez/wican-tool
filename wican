@@ -4,7 +4,7 @@ setup_tcp_connection() {
   local id=$1
   local ip_addr=$2
 
-  socat pty,link=/dev/meatpi${id},raw tcp:${ip_addr}:3333 1>/dev/null &
+  socat pty,link=/dev/wican${id},raw tcp:${ip_addr}:3333 1>/dev/null &
   return $!
 }
 
@@ -12,7 +12,7 @@ start_slcand() {
   local id=$1
   local ip_addr=$2
 
-  slcand -F -o -s5 /dev/meatpi${id} can${id} 1>/dev/null &
+  slcand -F -o -s5 /dev/wican${id} can${id} 1>/dev/null &
   return $!
 }
 
@@ -35,8 +35,6 @@ tcp_to_can() {
 report_connection_ok() {
   local id=$1
 
-  ps xa | grep "[m]eatpi${id}"
-  echo
   echo "Ready"
   echo "Try this command: candump can$id"
   echo "CTRL+C to exit"
