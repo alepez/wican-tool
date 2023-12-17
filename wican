@@ -77,14 +77,11 @@ main() {
     exit 1
   fi
 
+  # Ensure all commands are executed as root
   if [ ${USER} != "root" ]; then
     sudo $0 $@
     exit
   fi
-
-  # Just sudo to ask for password
-  # All next sudo won't ask the password
-  sudo true
 
   local bitrate=$4
 
