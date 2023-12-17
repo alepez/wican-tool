@@ -26,10 +26,20 @@ tcp_to_can() {
   local slcand_pid=$!
   sleep 1
   ip link set can${id} up
-
   report_connection_ok ${id}
-
   wait ${socat_pid} ${slcand_pid}
+}
+
+acm_to_can() {
+  local id=$1
+  local acm_device=$2
+
+  slcand -F -o -s5 -t sw -S 4000000 /dev/ttyACM0 can${id} 1>/dev/null &
+  local slcand_pid=$!
+  sleep 1
+  ip link set can${id} up
+  report_connection_ok ${id}
+  wait ${slcand_pid}
 }
 
 report_connection_ok() {
