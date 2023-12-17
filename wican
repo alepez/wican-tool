@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+setup_tcp_connection() {
+  local id=$1
+  local ip_addr=$2
+
+  socat pty,link=/dev/meatpi${id},raw tcp:${ip_addr}:3333 1>/dev/null &
+  return $!
+}
+
+start_slcand() {
+  local id=$1
+  local ip_addr=$2
+
+  slcand -F -o -s5 /dev/meatpi${id} can${id} 1>/dev/null &
+  return $!
+}
+
+tcp_to_can() {
+  local id=$1
+  local ip_addr=$2
+  setup_tcp_connection ${id} ${ip_addr}
+  local socat_pid=$!
+  sleep 1
+  start_slcand ${id}
+  local slcand_pid=$!
+  sleep 1
+  ip link set can${id} up
+
+  report_connection_ok ${id}
+
+  wait ${socat_pid} ${slcand_pid}
+}
+
+report_connection_ok() {
+  local id=$1
+
+  ps xa | grep "[m]eatpi${id}"
+  echo
+  echo "Ready"
+  echo "Try this command: candump can$id"
+  echo "CTRL+C to exit"
+}
+
+help() {
+  echo "$0 tcp <id> <ip_addr>"
+  echo "$0 acm <id> <device>"
+  echo "example: $0 tcp 0 192.168.80.1"
+  echo "example: $0 acm 0 /dev/ttyACM0"
+}
+
+main() {
+  if [ -z "${3}" ]; then
+    help
+    exit 1
+  fi
+
+  if [ ${USER} != "root" ]; then
+    sudo $0 $@
+    exit
+  fi
+
+  # Just sudo to ask for password
+  # All next sudo won't ask the password
+  sudo true
+
+  case $1 in
+    tcp) tcp_to_can $2 $3;;
+    acm) acm_to_can $2 $3;;
+    *) help; exit 1;;
+  esac
+
+  # TODO
+  sudo killall -9 socat
+  sudo killall -9 slcand
+}
+
+main $@
