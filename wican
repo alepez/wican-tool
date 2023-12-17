@@ -65,10 +65,10 @@ report_connection_ok() {
 }
 
 help() {
-  echo "$0 tcp <id> <ip_addr>"
-  echo "$0 acm <id> <device>"
-  echo "example: $0 tcp 0 192.168.80.1"
-  echo "example: $0 acm 0 /dev/ttyACM0"
+  echo "$0 tcp <id> <ip_addr> <bitrate>"
+  echo "$0 acm <id> <device> <bitrate>"
+  echo "example: $0 tcp 0 192.168.80.1 250000"
+  echo "example: $0 acm 0 /dev/ttyACM0 250000"
 }
 
 main() {
