@@ -30,7 +30,8 @@ If your *WiCAN* has another network configuration, just change the ip address:
 wican tcp 0 192.168.1.217 250000
 ```
 
-If you have a second *WiCAN* device, just change the `<id>` parameter:
+If you have a second *WiCAN* device, just change the `<id>` parameter, it will
+create a second can device: `can1`
 
 ```sh
 wican tcp 1 192.168.1.218 250000

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -x
-
 can_bitrate_to_command() {
   case $1 in
     10000) echo 0;;
