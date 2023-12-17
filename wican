@@ -1,5 +1,22 @@
 #!/usr/bin/env bash
 
+set -x
+
+can_bitrate_to_command() {
+  case $1 in
+    10000) echo 0;;
+    20000) echo 1;;
+    50000) echo 2;;
+    100000) echo 3;;
+    125000) echo 4;;
+    250000) echo 5;;
+    500000) echo 6;;
+    800000) echo 7;;
+    1000000) echo 8;;
+    *) echo "Invalid bitrate ${1}" >&2; echo 8;;
+  esac
+}
+
 setup_tcp_connection() {
   local id=$1
   local ip_addr=$2
@@ -8,21 +25,16 @@ setup_tcp_connection() {
   return $!
 }
 
-start_slcand() {
-  local id=$1
-  local ip_addr=$2
-
-  slcand -F -o -s5 /dev/wican${id} can${id} 1>/dev/null &
-  return $!
-}
-
 tcp_to_can() {
   local id=$1
   local ip_addr=$2
+  local bitrate=$3
+  local bitrate_command=$( can_bitrate_to_command $bitrate )
+
   setup_tcp_connection ${id} ${ip_addr}
   local socat_pid=$!
   sleep 1
-  start_slcand ${id}
+  slcand -F -o -s${bitrate_command} /dev/wican${id} can${id} 1>/dev/null &
   local slcand_pid=$!
   sleep 1
   ip link set can${id} up
@@ -33,8 +45,10 @@ tcp_to_can() {
 acm_to_can() {
   local id=$1
   local acm_device=$2
+  local bitrate=$3
+  local bitrate_command=$( can_bitrate_to_command $bitrate )
 
-  slcand -F -o -s5 -t sw -S 4000000 /dev/ttyACM0 can${id} 1>/dev/null &
+  slcand -F -o -s${bitrate_command} -t sw -S 4000000 ${acm_device} can${id} 1>/dev/null &
   local slcand_pid=$!
   sleep 1
   ip link set can${id} up
@@ -72,9 +86,16 @@ main() {
   # All next sudo won't ask the password
   sudo true
 
+  local bitrate=$4
+
+  if [ -z "${bitrate}" ]; then
+    echo "Bitrate not specified, using default: 1000000" >&2
+    bitrate=1000000
+  fi
+
   case $1 in
-    tcp) tcp_to_can $2 $3;;
-    acm) acm_to_can $2 $3;;
+    tcp) tcp_to_can $2 $3 $bitrate;;
+    acm) acm_to_can $2 $3 $bitrate;;
     *) help; exit 1;;
   esac
 
