@@ -1,6 +1,7 @@
 # wican-tool
 
-I've created this simple tool to help me setup a *MeatPi WiCAN* device.
+I've created this simple tool to help me setup a [*MeatPi
+WiCAN*](https://www.meatpi.com/products/wican) device.
 
 ## Install
 
